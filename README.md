@@ -11,6 +11,14 @@ The central server accepts the information from each of the base stations and lo
 
 The central server is also in charge of presenting the information to any security personnel.
 
+## Logical Layers
+
+The system is contained in three logical layers, each handling their own specific part of the task.
+
+- API Layer: Contains accepting logic from web connection's and utilizes other resources on the server to acomplish the task. Very little logic should be used in this layer.
+- Logic Layer: Contains most of the servers logic. This is where all the mathimatical computation is done, as well as the process of determining an SOS. Information is stored in a local database through the database layer, and is utalized by the API Layer.
+- Database Layer: An abstraction layer to the document database utilized by the Logic Layer. This makes creating specific records easier by doing the database specific logic in a single place.
+
 ## API Logical Resources
 
 `_GeneralAPI` - Used as a base for all other resources. This creates an interface with the database and provides defaults for error's and general handling.
