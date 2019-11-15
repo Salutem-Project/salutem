@@ -12,7 +12,7 @@ app = Flask(__name__)
 api = Api(app)
 
 # API endpoints
-api.add_resource(Remotes, "path/to/resource/<string:remoteID>")
+api.add_resource(Remotes, "remote/<string:remoteID>")
 
 # Running the Application
 app.run(debug=True)
