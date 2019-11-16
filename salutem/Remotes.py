@@ -1,6 +1,3 @@
-# Parsing API request information
-from flask_restful import reqparse
-
 # Local modules
 from SalutemAPI import _SalutemAPI
 from settings import getAPISettings
@@ -106,7 +103,7 @@ class Remotes(_SalutemAPI):
 			locations = {}
 
 			# Checking for wildcard
-			if remoteID = '*':
+			if remoteID == '*':
 				# Getting the remote ID's of all the remotes on the system
 				remoteIDs = self._database.getRemotes().keys()
 			else:

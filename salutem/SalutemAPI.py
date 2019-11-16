@@ -1,11 +1,14 @@
+# Parsing API request information
+from flask_restful import reqparse, Resource
+
 # Standard packages
 from os.path import join
 
 # Local modules
-from database import DatabaseAbstractionLayer
+from Database import DatabaseAbstractionLayer
 from settings import getAPISettings
 
-class _SalutemAPI():
+class _SalutemAPI(Resource):
 	def _createDatabase(self, salutemSettings):
 		# Creating an instance of the database with out database settings in mind
 		self._database = DatabaseAbstractionLayer(salutemSettings)
