@@ -9,6 +9,9 @@ from Database import DatabaseAbstractionLayer
 from settings import getAPISettings
 
 class _SalutemAPI(Resource):
+	def get(self):
+		return "Hello, World"
+
 	def _createDatabase(self, salutemSettings):
 		# Creating an instance of the database with out database settings in mind
 		self._database = DatabaseAbstractionLayer(salutemSettings)
