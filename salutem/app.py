@@ -24,4 +24,4 @@ if __name__ == "__main__":
 	_ = salutemAPI()
 	# Running the application
 	global FLASK_API
-	FLASK_APP.run(debug=True)
+	FLASK_APP.run(host='0.0.0.0', port=80, debug=True)
