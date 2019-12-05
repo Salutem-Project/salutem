@@ -26,6 +26,6 @@ class _SalutemAPI(Resource):
 
 	def _setupEndpoint(self, argumentList=None):
 		# Creating a database in self._database
-		self._createDatabase(getAPISettings(join('assets', 'databaseSettings.json')))
+		# self._createDatabase(getAPISettings(join('assets', 'databaseSettings.json')))
 		# Returning arguments parsed from an argument list
 		return self._parseArguments(argumentList) if argumentList is not None else None

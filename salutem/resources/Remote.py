@@ -2,6 +2,8 @@
 from salutem.resources.Endpoint import _SalutemAPI
 from salutem.settings import getAPISettings
 
+from datetime import datetime
+
 # This module does its best to use a modified google docstring standard - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
 class Remote(_SalutemAPI):
@@ -66,13 +68,23 @@ class Remote(_SalutemAPI):
 					This information can be additional attachments to the remote and can span from things like heart rate, to the temperature surrounding the remote.
 		'''
 		try:
+			print(f'Putting remote {remoteID}', flush=True)
 			args = self._setupEndpoint([
 				'baseStationID',
 				'signalStrength',
 				'priority',
 			])
 			# Recording record with our database
-			self._database.recordPing(remoteID, **args)
+			# self._database.recordPing(remoteID, **args)
+
+			with open('log.log', 'a') as outfile:
+				outfile.write('\n' + str(datetime.now()) + f' | RemoteID: "{remoteID}"\n')
+
+				for key, value in args.items():
+					outString = f'   {key}: {value}\n'
+					outfile.write(outString)
+					# print(outString, flush=True)
+
 			# Returning success
 			return 'Data successfully delivered.', 200
 		except:
