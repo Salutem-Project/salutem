@@ -1,12 +1,13 @@
 # Parsing API request information
 from flask_restful import reqparse, Resource
+from flask import request
 
 # Standard packages
 from os.path import join
 
 # Local modules
-from Database import DatabaseAbstractionLayer
-from settings import getAPISettings
+from salutem.Database import DatabaseAbstractionLayer
+from salutem.settings import getAPISettings
 
 class _SalutemAPI(Resource):
 	def get(self):
@@ -18,6 +19,7 @@ class _SalutemAPI(Resource):
 
 	def _parseArguments(self, argumentList):
 		parser = reqparse.RequestParser()
+		print(request.headers, flush=True)
 		for argument in argumentList:
 			parser.add_argument(argument)
 		return parser.parse_args()

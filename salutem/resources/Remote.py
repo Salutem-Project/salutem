@@ -1,10 +1,10 @@
 # Local modules
-from SalutemAPI import _SalutemAPI
-from settings import getAPISettings
+from salutem.resources.Endpoint import _SalutemAPI
+from salutem.settings import getAPISettings
 
 # This module does its best to use a modified google docstring standard - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
-class Remotes(_SalutemAPI):
+class Remote(_SalutemAPI):
 	''' API access to data pertaining to remote security devices.
 
 		Arguments: The API will have the same argument for each operator, so I'll only specify it this once. Instead, the documentation for each operator will include a 'payload' section that wil act vary similar.

@@ -2,26 +2,24 @@
 
 # Flask server modules
 from flask import Flask
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api
 
 # Local modules
-import Remotes
+from salutem.resources.Remote import Remote as RemoteEndpoint
 
-class salutemAPI():
-	def __init__(self):
-		global FLASK_APP, FLASK_API
+# Creating our application and API
+FLASK_APP = Flask(__name__)
+FLASK_API = Api(FLASK_APP)
 
-		# Creating our application and API
-		FLASK_APP = Flask(__name__)
-		FLASK_API = Api(FLASK_APP)
+# API endpoints
+FLASK_API.add_resource(RemoteEndpoint, "/remote/<string:remoteID>")
 
-		# API endpoints
-		FLASK_API.add_resource(Remotes.Remotes, "/remote/<string:remoteID>")
-		from SalutemAPI import _SalutemAPI as coverpage
-		FLASK_API.add_resource(coverpage, "/")
-
+# Starting the application up if this is the main file
 if __name__ == "__main__":
-	_ = salutemAPI()
-	# Running the application
-	global FLASK_API
-	FLASK_APP.run(host='0.0.0.0', port=80, debug=True)
+	startAPIApplication()
+
+# Allowing other modules to start an application without knowing how to
+def startAPIApplication():
+	# Telling the flask application to run and listen on public port 1080
+	FLASK_APP.run(host='0.0.0.0', port=int("1080"), debug=True)
+	# We specify the int because flasky is picky. It just works so don't touch it
