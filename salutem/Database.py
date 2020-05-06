@@ -119,6 +119,14 @@ class DatabaseAbstractionLayer():
         uses push to keep a history of locations
         update_data1  = {'$push':{'station':{'s_id':1,'location':'room A', 'signal':1.2}}}
 
+        Should expect a dictionary with the following keys:
+            'r_id': The remote's unique identifier that the station picked up
+            's_id': The stations unique identifier of the reporting station
+            'signal': The strength of the signal received from the station
+
+        This should have a single input dictionary with the minimal information required to put into the database.
+        If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
+
         '''
         if 'r_id' in remote_data and '$push' in update_data:
             result=self.remote.update_one(remote_data,update_data)
