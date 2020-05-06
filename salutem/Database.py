@@ -128,7 +128,7 @@ class DatabaseAbstractionLayer():
            's_id':id for the station
            'location':where the station is
         '''
-        if ('s_id' in station_data) and ('location' in station_data):
+        if ('s_id' in station_data):
             result = self.station.delete_one(station_data)
             pprint(result)
         else:
