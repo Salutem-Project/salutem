@@ -55,6 +55,10 @@ class DatabaseAbstractionLayer():
             print("invalid syntax")
 
     def find_remote(self,remote_name):
+    	'''
+        data is a dict of the remote data
+        location is a list of signals in the remote data returned by dict.get
+        trilaterare returns the index of the closest station in that original list of signal        '''
         data = self.ping(remote_name)
         location = data.get(u'station')
         index = trilaterate(location)
@@ -145,15 +149,14 @@ if __name__ == '__main__':
     foo = DatabaseAbstractionLayer()
     #creates testing data
     data=foo.create_station(station_data)
-    #foo.remove_station(station_data)
+    foo.remove_station(station_data)
     data=foo.create_remote(remote_data)
-    #foo.ping(remote_name)
+    foo.ping(remote_name)
     
     foo.update_remote(remote_data,update_data1)
-    #foo.remove_remote(remote_name)
     foo.update_remote(remote_data,update_data2)
     foo.update_remote(remote_data,update_data3)
-    #foo.ping(remote_name)
+    foo.ping(remote_name)
     #:foo.remove_remote(remote_name)
     data = foo.ping(remote_name)
     foo.remove_remote(remote_name)
