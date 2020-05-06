@@ -57,10 +57,11 @@ class DatabaseAbstractionLayer():
             print('invalid syntax')
 
     def find_remote(self,remote_name):
-    	'''
+        '''
         data is a dict of the remote data
         location is a list of signals in the remote data returned by dict.get
-        trilaterare returns the index of the closest station in that original list of signal        '''
+        trilaterare returns the index of the closest station in that original list of signal        
+        '''
         data = self.ping(remote_name)
         location = data.get(u'station')
         index = trilaterate(location)
