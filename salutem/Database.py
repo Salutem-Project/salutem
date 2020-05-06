@@ -77,7 +77,7 @@ class DatabaseAbstractionLayer():
             's_id': The reference id to the station
             'location':room number or letter
         '''
-        if 's_id' in station_data and 'location' in station_data:
+        if 's_id' in station_data in station_data:
             result=self.station.insert_one(station_data)
             pprint(result)
         else:
