@@ -58,6 +58,7 @@ class DatabaseAbstractionLayer():
             print("invalid syntax")
 
     def find_remote(self,remote_name):
+        #@TODO This needs some documentation
         data = self.ping(remote_name)
         location = data.get(u'station')
         index = trilaterate(location)
