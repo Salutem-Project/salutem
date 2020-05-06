@@ -64,6 +64,42 @@ class DatabaseAbstractionLayer():
         print("remote location is in",end = " ")
         pprint(location[index].get(u'location'))
 
+    def update_remote(self, remote_data, update_data):
+        '''
+        updates the remote collection with the new remote data
+        will be used to add location data in the UI
+
+        the update data parameter is just for the new information
+        uses push to keep a history of locations
+        update_data1  = {'$push':{'station':{'s_id':1,'location':'room A', 'signal':1.2}}}
+
+        Should expect a dictionary with the following keys:
+            'r_id': The remote's unique identifier that the station picked up
+            's_id': The stations unique identifier of the reporting station
+            'signal': The strength of the signal received from the station
+
+        This should have a single input dictionary with the minimal information required to put into the database.
+        If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
+
+        '''
+        if 'r_id' in remote_data and '$push' in update_data:
+            result=self.remote.update_one(remote_data,update_data)
+            pprint(result)
+        else:
+            print("invalid syntax")
+
+    def ping(self, remote_name):
+        '''
+        returns the most current remote location based on the last update from update_remote
+        in the format of remote_name = {'r_id':1}
+        '''
+        if 'r_id' in remote_data:
+            result=self.remote.find_one(remote_name)
+            #pprint(result)
+            return result
+        else:
+            print("invalid syntax")
+
    # Station
    #####################################
     def create_station(self, station_data):
