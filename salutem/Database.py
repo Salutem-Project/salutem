@@ -79,6 +79,7 @@ class DatabaseAbstractionLayer():
             'r_id': The remote's unique identifier that the station picked up
             's_id': The stations unique identifier of the reporting station
             'signal': The strength of the signal received from the station
+            'priority': Priority of the transmission
 
         This should have a single input dictionary with the minimal information required to put into the database.
         If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
@@ -142,11 +143,11 @@ if __name__ == '__main__':
     # Creating example data
     remote_data = {'r_id':1,'employee':'Jeff'}
     station_data = {'s_id':1,'location':'Room A'}
-    station_data_example = {'s_id':1,'location':'Room A' , 'x_cord':200 , 'y_cord': 100.01}
+    station_data_example = {'s_id':1,'location':'Room A' , 'x_cord': 200 , 'y_cord': 100.01}
     remote_name = {'r_id':1}
-    update_data1  = {'$push':{'station':{'s_id':1,'location':'room A', 'signal':-45}}}
-    update_data2  = {'$push':{'station':{'s_id':2,'location':'room B', 'signal':-20}}}
-    update_data3  = {'$push':{'station':{'s_id':3,'location':'room C', 'signal':-80}}}
+    update_data1  = {'$push':{'station':{'s_id': 1,'location':'room A', 'signal': -45}}}
+    update_data2  = {'$push':{'station':{'s_id': 2,'location':'room B', 'signal': -20}}}
+    update_data3  = {'$push':{'station':{'s_id': 3,'location':'room C', 'signal': -80}}}
 
 
     foo = Database_Abstraction()
