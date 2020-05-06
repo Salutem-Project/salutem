@@ -139,12 +139,12 @@ class DatabaseAbstractionLayer():
    # Print functions
    #####################################
     def print_remotes(self):
-    '''
-    prints all current remotes in the databse to the screen
-    '''
-    result=self.remote.find()
-    for cursor in result:
-        pprint(cursor)
+        '''
+        prints all current remotes in the database to the screen
+        '''
+        result=self.remote.find()
+        for cursor in result:
+            pprint(cursor)
 
     def print_stations(self):
         '''
