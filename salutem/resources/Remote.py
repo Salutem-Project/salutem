@@ -19,7 +19,7 @@ class Remote(_SalutemAPI):
 		''' Register a remote to a userID.
 
 			Payload:
-				userID (str): The unique identifier for the user that has "checked out" the remote.
+				u_id: The user's id code or unique identifier
 
 			Returns:
 				Information about the remote given from the database. 200 on successful registration.
@@ -27,14 +27,15 @@ class Remote(_SalutemAPI):
 				HTTP status codes - https://www.restapitutorial.com/httpstatuscodes.html
 		'''
 		try:
-			args = self._setupEndpoint(['userID'])
+			args = self._setupEndpoint(['u_id'])
+			args['r_id'] = remoteID
 			# Registering this information with the database
-			remoteInfo = self._database.registerDevice(args['userID'])
+			remoteInfo = self._database.create_remote(args)
 			# Returning success
 			return remoteInfo, 200
 		except:
 			# Unable to register the device for some reason - internal server error
-			return 'Device could not be registered.', 500
+			return('Device could not be registered.', 500)
 
 	def delete(self, remoteID):
 		''' De-register a remote device from any user.
@@ -47,15 +48,15 @@ class Remote(_SalutemAPI):
 		try:
 			_ = self._setupEndpoint()
 			# Clearing all user information from the remote
-			self._database.registerDevice(None)
+			self._database.remove_remote({'r_id': remoteID})
 			# Returning success
 			return f'{remoteID} successfully de-registered', 200
 		except ValueError:
 			# Remote not found, no need to delete record - success
-			return 'Device not found.', 200
+			return('Device not found.', 200)
 		except:
 			# Remote unable to de-register for some reason - internal server error
-			return 'Unable to register device.', 500
+			return('Unable to delete device.', 500)
 
 	def put(self, remoteID):
 		''' Register a single piece of information to determine the location of a remote.
@@ -70,26 +71,26 @@ class Remote(_SalutemAPI):
 		try:
 			print(f'Putting remote {remoteID}', flush=True)
 			args = self._setupEndpoint([
-				'baseStationID',
-				'signalStrength',
+				's_id',
+				'r_id',
 				'priority',
 			])
 			# Recording record with our database
-			# self._database.recordPing(remoteID, **args)
+			self._database.update_remote(remoteID, **args)
 
-			with open('log.log', 'a') as outfile:
-				outfile.write('\n' + str(datetime.now()) + f' | RemoteID: "{remoteID}"\n')
+			# with open('log.log', 'a') as outfile:
+			# 	outfile.write('\n' + str(datetime.now()) + f' | RemoteID: "{remoteID}"\n')
 
-				for key, value in args.items():
-					outString = f'   {key}: {value}\n'
-					outfile.write(outString)
-					# print(outString, flush=True)
+			# 	for key, value in args.items():
+			# 		outString = f'   {key}: {value}\n'
+			# 		outfile.write(outString)
+			# 		# print(outString, flush=True)
 
 			# Returning success
-			return 'Data successfully delivered.', 200
+			return('Data successfully delivered.', 200)
 		except:
 			# Unable to store information about remote - internal server error
-			return 'Unable to record information.', 500
+			return('Unable to record information.', 500)
 
 	def get(self, remoteID):
 		''' Gets the location information for the remoteID in question.
@@ -110,27 +111,32 @@ class Remote(_SalutemAPI):
 				Dictionary contains many keys if all devices are requested.
 		'''
 		try:
-			args = self._setupEndpoint()
+			args = self._setupEndpoint([
+				's_id',     # Station id
+				'signal',   # Signal strength
+				'priority', # Priority of the transmission
+			])
+			args['r_id'] = remoteID
 			# Creating a locations dictionary to store our remote locations in
 			locations = {}
 
-			# Checking for wildcard
-			if remoteID == '*':
-				# Getting the remote ID's of all the remotes on the system
-				remoteIDs = self._database.getRemotes().keys()
-			else:
-				remoteIDs = remoteID
+			# # Checking for wildcard
+			# if remoteID == '*':
+			# 	# Getting the remote ID's of all the remotes on the system
+			# 	remoteIDs = self._database.getRemotes().keys()
+			# else:
+			# 	remoteIDs = remoteID
 
 			# Collecting the location information for each remote
 			for remoteID in remoteIDs:
 				locations[remoteID] = self.locateRemote(remoteID)
 
 			# Returning success
-			return locations, 200
+			return(self._database.update_remote(args), 200)
 
 		except:
 			# Unable to gather information about locations - internal server error
-			return 'Locations can not be found', 500
+			return('Locations can not be found', 500)
 
 	def locateRemote(self, remoteID):
 		''' Returns the (x, y) coords of the referenced remote.
