@@ -140,9 +140,9 @@ if __name__ == '__main__':
     station_data = {'s_id': 1,'location': 'Room A'}
     station_data_example = {'s_id': 1,'location': 'Room A' , 'x_cord': 200 , 'y_cord': 100.01}
     remote_name = {'r_id': 1}
-    update_data1  = {'station':{'s_id': 1,'location': 'room A', 'signal': -45}}
-    update_data2  = {'station':{'s_id': 2,'location': 'room B', 'signal': -20}}
-    update_data3  = {'station':{'s_id': 3,'location': 'room C', 'signal': -80}}
+    update_data1  = {'s_id': 1,'location': 'room A', 'signal': -45}
+    update_data2  = {'s_id': 2,'location': 'room B', 'signal': -20}
+    update_data3  = {'s_id': 3,'location': 'room C', 'signal': -80}
 
 
     foo = DatabaseAbstractionLayer()
