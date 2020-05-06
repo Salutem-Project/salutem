@@ -14,6 +14,7 @@ from pymongo import MongoClient
 from pprint import pprint
 from tri import trilaterate
 import json
+
 class DatabaseAbstractionLayer():
 
     def __init__(self):
@@ -38,7 +39,7 @@ class DatabaseAbstractionLayer():
             u_id: The user's id code or unique identifier
 
         '''
-        if 'r_id' in remote_data and 'u_id' in remote_data:
+        if ('r_id' in remote_data) and ('u_id' in remote_data):
             self.remote.insert_one(remote_data)
         else:
             print("invalid syntax")
@@ -52,12 +53,12 @@ class DatabaseAbstractionLayer():
             r_id: id for the remote
         '''
         if 'r_id' in remote_name:
-            result=self.remote.delete_many(remote_name)
+            result = self.remote.delete_many(remote_name)
             pprint(result)
         else:
             print("invalid syntax")
 
-    def find_remote(self,remote_name):
+    def find_remote(self, remote_name):
         #@TODO This needs some documentation
         data = self.ping(remote_name)
         location = data.get(u'station')
@@ -112,8 +113,8 @@ class DatabaseAbstractionLayer():
             's_id': The reference id to the station
             'location':room number or letter
         '''
-        if 's_id' in station_data and 'location' in station_data:
-            result=self.station.insert_one(station_data)
+        if ('s_id' in station_data) and ('location' in station_data):
+            result = self.station.insert_one(station_data)
             pprint(result)
         else:
             print("invalid syntax")
@@ -127,49 +128,15 @@ class DatabaseAbstractionLayer():
            's_id':id for the station
            'location':where the station is
         '''
-        if 's_id' in station_data and 'location' in station_data:
-            result=self.station.delete_one(station_data)
+        if ('s_id' in station_data) and ('location' in station_data):
+            result = self.station.delete_one(station_data)
             pprint(result)
         else:
             print("invalid syntax")
 
    # Misc
    #####################################
-    def ping(self, remote_name):
-        '''
-        returns the most current remote location based on the last update from update_remote
-        in the format of remote_name = {'r_id':1}
-        '''
-        if 'r_id' in remote_data:
-            result=self.remote.find_one(remote_name)
-            #pprint(result)
-            return result
-        else:
-            print("invalid syntax")
 
-    def update_remote(self,remote_data,update_data):
-        '''
-        updates the remote collection with the new remote data
-        will be used to add location data in the UI
-
-        the update data parameter is just for the new information
-        uses push to keep a history of locations
-        update_data1  = {'$push':{'station':{'s_id':1,'location':'room A', 'signal':1.2}}}
-
-        Should expect a dictionary with the following keys:
-            'r_id': The remote's unique identifier that the station picked up
-            's_id': The stations unique identifier of the reporting station
-            'signal': The strength of the signal received from the station
-
-        This should have a single input dictionary with the minimal information required to put into the database.
-        If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
-
-        '''
-        if 'r_id' in remote_data and '$push' in update_data:
-            result=self.remote.update_one(remote_data,update_data)
-            pprint(result)
-        else:
-            print("invalid syntax")
 
 if __name__ == '__main__':
     # Creating example data
