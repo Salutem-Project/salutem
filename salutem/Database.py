@@ -45,15 +45,15 @@ class DatabaseAbstractionLayer():
         data = self.ping(remote_data)
         return data
 
-    def remove_remote(self, remote_name):
+    def remove_remote(self, remote_data):
         '''
         for end of day cleaning of remote for next day
-        in the format of remote_name = {'r_id':1}
+        in the format of remote_data = {'r_id':1}
         Keys:
             r_id: id for the remote
         '''
-        if 'r_id' in remote_name:
-            result=self.remote.delete_many(remote_name)
+        if 'r_id' in remote_data:
+            result=self.remote.delete_many(remote_data)
             pprint(result)
         else:
             print("invalid syntax")
