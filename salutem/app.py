@@ -6,6 +6,7 @@ from flask_restful import Api
 
 # Local modules
 from salutem.resources.Remote import Remote as RemoteEndpoint
+from salutem.resources.Station import Station as StationEndpoint
 
 # Creating our application and API
 FLASK_APP = Flask(__name__)
@@ -13,6 +14,7 @@ FLASK_API = Api(FLASK_APP)
 
 # API endpoints
 FLASK_API.add_resource(RemoteEndpoint, "/remote/<string:remoteID>")
+FLASK_API.add_resource(StationEndpoint, "/station/<string:stationID>")
 
 # Starting the application up if this is the main file
 if __name__ == "__main__":
