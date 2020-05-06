@@ -13,8 +13,9 @@ https://forums.meteor.com/t/on-multiple-collections-vs-embedded-documents/42882/
 '''
 from pymongo import MongoClient
 from pprint import pprint
-from tri import trilaterate
+from salutem.tri import trilaterate
 import json
+
 class DatabaseAbstractionLayer():
 
     def __init__(self):
@@ -57,7 +58,7 @@ class DatabaseAbstractionLayer():
         else:
             print("invalid syntax")
 
-    def update_remote(self,remote_data,update_data):
+    def update_remote(self, remote_data, update_data):
         '''
         updates the remote collection with the new remote data
         will be used to add location data in the UI
@@ -80,25 +81,25 @@ class DatabaseAbstractionLayer():
         data = self.ping(remote_name)
         return data
 
-    def ping(self, remote_name):
+    def ping(self, remote_data):
         '''
         returns the most current remote location based on the last update from update_remote
-        in the format of remote_name = {'r_id':1}
+        in the format of remote_data = {'r_id':1}
         '''
         if 'r_id' in remote_data:
-            result=self.remote.find_one(remote_name)
+            result=self.remote.find_one(remote_data)
             #pprint(result)
             return result
         else:
             print("invalid syntax")
 
-    def find_remote(self,remote_name):
+    def find_remote(self,remote_data):
         '''
         data is a dict of the remote data
         location is a list of signals in the remote data returned by dict.get
-        trilaterare returns the index of the closest station in that original list of signal        
+        trilaterare returns the index of the closest station in that original list of signal
         '''
-        data = self.ping(remote_name)
+        data = self.ping(remote_data)
         location = data.get(u'station')
         index = trilaterate(location)
         print("remote location is in",end = " ")
@@ -167,9 +168,9 @@ class DatabaseAbstractionLayer():
 
 if __name__ == '__main__':
     # Creating example data
-    remote_data = {'r_id':1,'u_id':'Jeff/15'}
+    remote_data = {'r_id':1,'u_id':'166'}
     station_data = {'s_id':1,'location':'Room A'}
-    station_data_example = {'s_id':1,'location':'Room A' , 'x_cord':200 , 'y_cord': 100.01}
+    station_data_example = {'s_id': 1, 'location':'Room A', 'x_cord':200, 'y_cord': 100.01}
     remote_name = {'r_id':1}
     update_data1  = {'station':{'s_id':1,'location':'room A', 'signal':-45}}
     update_data2  = {'station':{'s_id':2,'location':'room B', 'signal':-20}}
