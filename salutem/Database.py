@@ -179,9 +179,9 @@ if __name__ == '__main__':
 
     foo = DatabaseAbstractionLayer()
     #creates testing data
-    data=foo.create_station(station_data)
+    data  =foo.create_station(station_data)
     #foo.remove_station(station_data)
-    data=foo.create_remote(remote_data)
+    data = foo.create_remote(remote_data)
     foo.ping(remote_name)
 
     foo.update_remote(remote_data,update_data1)
