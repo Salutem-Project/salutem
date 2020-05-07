@@ -38,7 +38,7 @@ class DatabaseAbstractionLayer():
             r_id: The remotes unique identifier
             u_id: The user's id code or unique identifier
         '''
-        if 'r_id' in remote_data and 'u_id' in remote_data:
+        if ('r_id' in remote_data) and ('u_id' in remote_data):
             self.remote.insert_one(remote_data)
         else:
             print("invalid syntax")
@@ -52,7 +52,7 @@ class DatabaseAbstractionLayer():
         Keys:
             r_id: id for the remote
         '''
-        if 'r_id' in remote_data:
+        if ('r_id' in remote_data):
             result=self.remote.delete_many(remote_data)
             pprint(result)
         else:
@@ -73,7 +73,7 @@ class DatabaseAbstractionLayer():
         This should have a single input dictionary with the minimal information required to put into the database.
         If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
         '''
-        if 'r_id' in remote_data:
+        if ('r_id' in remote_data):
             result=self.remote.update_one(remote_data,{'$push':update_data})
             pprint(result)
         else:
@@ -139,32 +139,23 @@ class DatabaseAbstractionLayer():
 
    # Print functions
    #####################################
-    def print_remotes(self):
+    def get_remotes(self):
         '''
-        prints all current remotes in the database to the screen
+        Returns a list of all remote collections as python dictionaries.
         '''
-        result=self.remote.find()
-        for cursor in result:
-            pprint(cursor)
+        return [_ for _ in self.remote.find()]
 
-    def print_stations(self):
+    def get_stations(self):
         '''
-        prints all current stations in database to screen
+        Returns a list of all station collections as python dictionaries.
         '''
-        result=self.station.find()
-        for cursor in result:
-            pprint(cursor)
+        return [_ for _ in self.station.find()]
 
-    def print_all(self):
+    def get_all(self):
         '''
         print all objects in both remote and station to screen
         '''
-        result=self.remote.find()
-        for cursor in result:
-            pprint(cursor)
-        result=self.station.find()
-        for cursor in result:
-            pprint(cursor)
+        return self.get_remotes() + get_stations()
 
 if __name__ == '__main__':
     # Creating example data
