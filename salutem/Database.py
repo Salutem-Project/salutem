@@ -1,9 +1,8 @@
-#!/bin/env python36
-
 # https://www.mongodb.com/blog/post/getting-started-with-python-and-mongodb
 # https://api.mongodb.com/python/current/tutorial.html
 # https://kb.objectrocket.com/mongo-db/how-to-access-and-parse-mongodb-documents-in-python-364
 # used as guide and reference for this
+#https://stackoverflow.com/questions/37941610/get-all-documents-of-a-collection-using-pymongo
 
 '''
 Store the sub-records in the main document, and also write them to the separate collection
@@ -36,10 +35,10 @@ class DatabaseAbstractionLayer():
             r_id: The remotes unique identifier
             u_id: The user's id code or unique identifier
         '''
-        if ('r_id' in remote_data) and ('u_id' in remote_data):
+        if 'r_id' in remote_data and 'u_id' in remote_data:
             self.remote.insert_one(remote_data)
         else:
-            print('invalid syntax')
+            print("invalid syntax")
         data = self.ping(remote_data)
         return data
 
@@ -50,34 +49,103 @@ class DatabaseAbstractionLayer():
         Keys:
             r_id: id for the remote
         '''
-        if ('r_id' in remote_name):
-            result = self.remote.delete_many(remote_name)
+        if 'r_id' in remote_name:
+            result=self.remote.delete_many(remote_name)
             pprint(result)
         else:
-            print('invalid syntax')
+            print("invalid syntax")
+    def print_all_remotes(self):
+        '''
+        prints all current remotes in the databse to the screen
+        '''
+        master=[]
+        result=self.remote.find()
+        for cursor in result:
+            master.append(cursor)
+        print(master)
+        return master
 
     def find_remote(self,remote_name):
-    	'''
+        '''
         data is a dict of the remote data
         location is a list of signals in the remote data returned by dict.get
         trilaterare returns the index of the closest station in that original list of signal        '''
         data = self.ping(remote_name)
         location = data.get(u'station')
         index = trilaterate(location)
-        print('remote location is in', end = ' ')
+        print("remote location is in",end = " ")
         pprint(location[index].get(u'location'))
 
+   # Station
+   #####################################
+    def create_station(self, station_data):
+        '''
+        Places a dictionary of information into the database, expecting specific keys.
+        in the format of station_data = {'s_id':1,'location':'Room A'}
+        Expected keys:
+            's_id': The reference id to the station
+            'location':room number or letter
+        '''
+        if 's_id' in station_data and 'location' in station_data:
+            result=self.station.insert_one(station_data)
+            pprint(result)
+        else:
+            print("invalid syntax")
+        data = self.station.find_one(station_data)
+        return data
+
+
+    def remove_station(self, station_data):
+        '''
+        Deletes the station from the database using s_id and location
+        in the format of station_data = {'s_id':1,'location':'Room A'}
+        Keys:
+           's_id':id for the station
+           'location':where the station is
+        '''
+        if 's_id' in station_data:
+            result=self.station.delete_one(station_data)
+            pprint(result)
+        else:
+            print("invalid syntax")
+    def print_all_stations(self):
+        '''
+        prints all current stations in database to screen
+        '''
+        master=[]
+        result=self.station.find()
+        for cursor in result:
+            master.append(cursor)
+        print(master)
+        return master
+
+   # Misc
+   #####################################
+    def print_all(self):
+        '''
+        print all objects in both remote and station to screen
+        '''
+        master=[]
+        result=self.remote.find()
+        for cursor in result:
+            pprint(cursor)
+            master.append(cursor)
+        result=self.station.find()
+        for cursor in result:
+            pprint(cursor)
+            master.append(cursor)
+        return master
     def ping(self, remote_name):
         '''
         returns the most current remote location based on the last update from update_remote
         in the format of remote_name = {'r_id':1}
         '''
-        if ('r_id' in remote_data):
-            result = self.remote.find_one(remote_name)
+        if 'r_id' in remote_data:
+            result=self.remote.find_one(remote_name)
             #pprint(result)
             return result
         else:
-            print('invalid syntax')
+            print("invalid syntax")
 
     def update_remote(self,remote_data,update_data):
         '''
@@ -94,69 +162,51 @@ class DatabaseAbstractionLayer():
         This should have a single input dictionary with the minimal information required to put into the database.
         If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
         '''
-        if ('r_id' in remote_data):
-            result = self.remote.update_one(remote_data, {'$push': {'station': update_data}})
+        if 'r_id' in remote_data:
+            result=self.remote.update_one(remote_data,{'$push':update_data})
             pprint(result)
         else:
-            print('invalid syntax')
+            print("invalid syntax")
         data = self.ping(remote_name)
         return data
 
-   # Station
-   #####################################
-    def create_station(self, station_data):
-        '''
-        Places a dictionary of information into the database, expecting specific keys.
-        in the format of station_data = {'s_id':1,'location':'Room A'}
-        Expected keys:
-            's_id': The reference id to the station
-            'location':room number or letter
-        '''
-        if ('s_id' in station_data) and ('location' in station_data):
-            result = self.station.insert_one(station_data)
-            pprint(result)
-        else:
-            print('invalid syntax')
-        data = self.station.find_one(station_data)
-        return data
-
-    def remove_station(self, station_data):
-        '''
-        Deletes the station from the database using s_id and location
-        in the format of station_data = {'s_id':1,'location':'Room A'}
-        Keys:
-           's_id':id for the station
-           'location':where the station is
-        '''
-        if ('s_id' in station_data):
-            result = self.station.delete_one(station_data)
-            pprint(result)
-        else:
-            print('invalid syntax')
-
 if __name__ == '__main__':
     # Creating example data
-    remote_data = {'r_id': 1,'u_id': 'Jeff/15'}
-    station_data = {'s_id': 1,'location': 'Room A'}
-    station_data_example = {'s_id': 1,'location': 'Room A' , 'x_cord': 200 , 'y_cord': 100.01}
-    remote_name = {'r_id': 1}
-    update_data1  = {'s_id': 1,'location': 'room A', 'signal': -45}
-    update_data2  = {'s_id': 2,'location': 'room B', 'signal': -20}
-    update_data3  = {'s_id': 3,'location': 'room C', 'signal': -80}
+    remote_data = {'r_id':1,'u_id':'Jeff/15'}
+    station_data = {'s_id':1,'location':'Room A','roomColor':'red'}
+    station_data_1= {'s_id':1,'location':'Room A' , 'x_cord':200 , 'y_cord': 100.01}
+    station_data_2= {'s_id':2,'location':'Room B' , 'x_cord':122 , 'y_cord': 56.31}
+    remote_name = {'r_id':1}
+    update_data1  = {'station':{'s_id':1,'location':'room A', 'signal':-45}}
+    update_data2  = {'station':{'s_id':2,'location':'room B', 'signal':-20}}
+    update_data3  = {'station':{'s_id':3,'location':'room C', 'signal':-80}}
 
 
     foo = DatabaseAbstractionLayer()
     #creates testing data
-    data = foo.create_station(station_data)
-    foo.remove_station(station_data)
-    data = foo.create_remote(remote_data)
+    foo.create_station(station_data_1)
+    foo.create_station(station_data_2)
+    input()
+    foo.create_station(station_data)
+    input()
+    #foo.remove_station(station_data)
+    foo.create_remote(remote_data)
     foo.ping(remote_name)
-
+    input()
     foo.update_remote(remote_data,update_data1)
     foo.update_remote(remote_data,update_data2)
     foo.update_remote(remote_data,update_data3)
-    foo.ping(remote_name)
+    input()
     #:foo.remove_remote(remote_name)
-    data = foo.ping(remote_name)
+    #foo.ping(remote_name)
+    #data=foo.print_all_stations()
+    #data=foo.print_all_remotes()
+    foo.print_all()
+    input()
+    foo.find_remote(remote_name)
+    input()
+    foo.create_remote(station_data)
     foo.remove_remote(remote_name)
-    #foo.find_remote(remote_name)
+    foo.remove_station(station_data_1)
+    foo.remove_station(station_data_2)
+    foo.remove_station(station_data)
