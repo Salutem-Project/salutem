@@ -16,7 +16,6 @@ class _SalutemAPI(Resource):
 
     def _parseArguments(self, argumentList):
         parser = reqparse.RequestParser()
-        print(request.headers, flush=True)
         for argument in argumentList:
             parser.add_argument(argument)
         return parser.parse_args()
