@@ -155,15 +155,15 @@ class DatabaseAbstractionLayer():
         '''
         print all objects in both remote and station to screen
         '''
-        return self.get_remotes() + get_stations()
+        return self.get_remotes() + self.get_stations()
 
 if __name__ == '__main__':
      # Creating instance of database
     foo = DatabaseAbstractionLayer()
 
     # Declaring example remote data
-    remote_test_data_1 = {'r_id': 1, 'u_id': 11}
-    remote_test_data_2 = {'r_id': 2, 'u_id': 12}
+    remote_test_data_1 = {'r_id': '1', 'u_id': '11'}
+    remote_test_data_2 = {'r_id': '2', 'u_id': '12'}
     remote_test_data_3 = {'r_id': 3, 'u_id': 13}
 
     # Adding some remotes
