@@ -25,7 +25,15 @@ class _SalutemAPI(Resource):
         return parser.parse_args()
 
     def _setupEndpoint(self, argumentList=None):
+        print('setting up endpoint', flush=True)
         # Creating a database in self._database
         self._createDatabase()
+        print('database created')
         # Returning arguments parsed from an argument list
-        return self._parseArguments(argumentList) if argumentList is not None else None
+        print(argumentList)
+        if argumentList is None:
+            print('arugment is none')
+            return None
+        else:
+            print('parsing arguments')
+            return self._parseArguments(argumentList)

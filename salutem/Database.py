@@ -30,6 +30,7 @@ class DatabaseAbstractionLayer():
 
     def _parse_to_JSON(self, package):
         package['_id'] = str(package['_id'])
+        return package
 
    # Remote
    #####################################
@@ -144,13 +145,13 @@ class DatabaseAbstractionLayer():
         '''
         Returns a list of all remote collections as python dictionaries.
         '''
-        return [_parse_to_JSON(_) for _ in self.remote.find()]
+        return [self._parse_to_JSON(_) for _ in self.remote.find()]
 
     def get_stations(self):
         '''
         Returns a list of all station collections as python dictionaries.
         '''
-        return [_parse_to_JSON(_) for _ in self.station.find()]
+        return [self._parse_to_JSON(_) for _ in self.station.find()]
 
     def get_all(self):
         '''
