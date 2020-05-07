@@ -82,7 +82,7 @@ class DatabaseAbstractionLayer():
         else:
             print("invalid syntax")
         data = self.ping(remote_name)
-        return data
+        return self._parse_to_JSON(data)
 
     def ping(self, remote_data):
         '''
@@ -146,13 +146,13 @@ class DatabaseAbstractionLayer():
         '''
         Returns a list of all remote collections as python dictionaries.
         '''
-        return [_ for _ in self.remote.find()]
+        return [_parse_to_JSON(_) for _ in self.remote.find()]
 
     def get_stations(self):
         '''
         Returns a list of all station collections as python dictionaries.
         '''
-        return [_ for _ in self.station.find()]
+        return [_parse_to_JSON(_) for _ in self.station.find()]
 
     def get_all(self):
         '''
