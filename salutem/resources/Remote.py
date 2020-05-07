@@ -28,8 +28,7 @@ class Remote(_SalutemAPI):
         '''
         try:
             # Collecting arguments from the payload
-            args = self._setupEndpoint(['u_id'])
-            from pprint import pprint
+            args = self._setupEndpoint(['u_id', 'additional_data'])
             # Registering this information with the database
             remoteInfo = self._database.create_remote(remoteID, *args.values())
             # Returning success
