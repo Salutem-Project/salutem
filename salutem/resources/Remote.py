@@ -27,9 +27,11 @@ class Remote(_SalutemAPI):
                 HTTP status codes - https://www.restapitutorial.com/httpstatuscodes.html
         '''
         try:
+            print('Posting remote')
             args = self._setupEndpoint(['u_id'])
             args['r_id'] = remoteID
             # Registering this information with the database
+            print(f'Doing stuff with {args}')
             remoteInfo = self._database.create_remote(args)
             from pprint import pprint
             pprint(remoteInfo)
