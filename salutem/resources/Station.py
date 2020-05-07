@@ -22,6 +22,9 @@ class Station(_SalutemAPI):
         try:
             # Collecting arguments from the payload
             args = self._setupEndpoint(['x_cord', 'y_cord', 'additional_data'])
+            from pprint import pprint
+            print(f'Adding station {stationID}')
+            pprint(args)
             # Registering this information with the database
             remoteInfo = self._database.create_station(stationID, *args.values())
             # Returning success
