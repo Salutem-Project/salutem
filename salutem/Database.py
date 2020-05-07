@@ -167,14 +167,14 @@ if __name__ == '__main__':
     remote_test_data_3 = {'r_id': 3, 'u_id': 13}
 
     # Adding some remotes
-    foo.create_remote(remote_data_test_1)
-    foo.create_remote(remote_data_test_2)
+    foo.create_remote(remote_test_data_1)
+    foo.create_remote(remote_test_data_2)
 
     # @TODO Check if remotes 1 & 2 are in the database
 
     # Removing remote 2 and adding 3, leaving 1 & 3 in the database
     foo.remove_remote({'r_id': 2})
-    foo.create_remote(remote_data_test_3)
+    foo.create_remote(remote_test_data_3)
 
     # @TODO Check if remote 1 and 3 are in the database
 

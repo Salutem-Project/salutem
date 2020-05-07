@@ -13,9 +13,9 @@ class _SalutemAPI(Resource):
 	def get(self):
 		return "Hello, World"
 
-	def _createDatabase(self, salutemSettings):
+	def _createDatabase(self):
 		# Creating an instance of the database with out database settings in mind
-		self._database = DatabaseAbstractionLayer(salutemSettings)
+		self._database = DatabaseAbstractionLayer()
 
 	def _parseArguments(self, argumentList):
 		parser = reqparse.RequestParser()
@@ -26,6 +26,6 @@ class _SalutemAPI(Resource):
 
 	def _setupEndpoint(self, argumentList=None):
 		# Creating a database in self._database
-		# self._createDatabase(getAPISettings(join('assets', 'databaseSettings.json')))
+		self._createDatabase()
 		# Returning arguments parsed from an argument list
 		return self._parseArguments(argumentList) if argumentList is not None else None
