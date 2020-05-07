@@ -28,6 +28,9 @@ class DatabaseAbstractionLayer():
         self.station = self.database.station
         self.backend = self.database.backend
 
+    def _parse_to_JSON(self, package):
+        package['_id'] = str(package['_id'])
+
    # Remote
    #####################################
     def create_remote(self, remote_data):
@@ -43,7 +46,7 @@ class DatabaseAbstractionLayer():
         else:
             print("invalid syntax")
         data = self.ping(remote_data)
-        return data
+        return self._parse_to_JSON(data)
 
     def remove_remote(self, remote_data):
         '''
