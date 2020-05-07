@@ -104,7 +104,17 @@ class DatabaseAbstractionLayer():
         index = trilaterate(location)
         print("remote location is in",end = " ")
         pprint(location[index].get(u'location'))
-
+        
+    def print_all_remotes(self):
+        '''
+        prints all current remotes in the databse to the screen
+        '''
+        master=[]
+        result=self.remote.find()
+        for cursor in result:
+            master.append(cursor)
+        print(master)
+        return master
    # Station
    #####################################
     def create_station(self, station_data):
@@ -136,6 +146,17 @@ class DatabaseAbstractionLayer():
             pprint(result)
         else:
             print("invalid syntax")
+            
+    def print_all_stations(self):
+        '''
+        prints all current stations in database to screen
+        '''
+        master=[]
+        result=self.station.find()
+        for cursor in result:
+            master.append(cursor)
+        print(master)
+        return master
 
    # Print functions
    #####################################
@@ -170,9 +191,9 @@ if __name__ == '__main__':
 
     foo = DatabaseAbstractionLayer()
     #creates testing data
-    data=foo.create_station(station_data)
+    data  =foo.create_station(station_data)
     #foo.remove_station(station_data)
-    data=foo.create_remote(remote_data)
+    data = foo.create_remote(remote_data)
     foo.ping(remote_name)
 
     foo.update_remote(remote_data,update_data1)
