@@ -13,6 +13,7 @@ FLASK_APP = Flask(__name__)
 FLASK_API = Api(FLASK_APP)
 
 # API endpoints
+FLASK_API.add_resource(DataEndpoint,  "/<string:group>")
 FLASK_API.add_resource(RemoteEndpoint, "/remote/<string:remoteID>")
 FLASK_API.add_resource(StationEndpoint, "/station/<string:stationID>")
 
