@@ -29,8 +29,9 @@ class Remote(_SalutemAPI):
         try:
             # Collecting arguments from the payload
             args = self._setupEndpoint(['u_id'])
+            from pprint import pprint
             # Registering this information with the database
-            remoteInfo = self._database.create_remote(remoteID, *args)
+            remoteInfo = self._database.create_remote(remoteID, *args.values())
             # Returning success
             return remoteInfo, 200
         except:
@@ -70,7 +71,7 @@ class Remote(_SalutemAPI):
             # Setting up our endpoint by getting some arguments
             args = self._setupEndpoint(['s_id', 'signal'])
             # Recording record with our database
-            self._database.ping_remote(remoteID, *args)
+            self._database.ping_remote(remoteID, *args.values())
             # Returning success
             return('Data successfully delivered.', 200)
         except:

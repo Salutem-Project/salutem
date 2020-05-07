@@ -23,7 +23,7 @@ class Station(_SalutemAPI):
             # Collecting arguments from the payload
             args = self._setupEndpoint(['x_cord', 'y_cord'])
             # Registering this information with the database
-            remoteInfo = self._database.create_station(stationID, *args)
+            remoteInfo = self._database.create_station(stationID, *args.values())
             # Returning success
             return remoteInfo, 200
         except:

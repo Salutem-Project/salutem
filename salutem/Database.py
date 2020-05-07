@@ -57,11 +57,14 @@ class DatabaseAbstractionLayer():
         if '_id' in additional_data:
             del additional_data['_id']
         # Placing our required arguments into our dictionary
-        additional_data['r_id'] = remote_id
-        additional_data['u_id'] = user_id
+        additional_data['r_id'] = str(remote_id)
+        additional_data['u_id'] = str(user_id)
         # Placing our dictionary into the database
         self._remote.insert_one(additional_data)
+        print('Inserting one')
         # Returning the record of the added remote
+        from pprint import pprint
+        # pprint('Remote = ' + {self.get_remotes(remote_id)})
         return self._parse_to_JSON(self.get_remotes(remote_id))
 
     def remove_remote(self, remote_id):
@@ -74,9 +77,8 @@ class DatabaseAbstractionLayer():
             Returns:
                 How many documents were deleted.
         '''
-        result = self._remote.delete_many({'r_id': int(remote_id)})
+        result = self._remote.delete_many({'r_id': str(remote_id)})
         # Returning the number of documents deleted
-        print(result.deleted_count)
         return result.deleted_count
 
     def ping_remote(self, remote_id, station_id, signal):
@@ -178,9 +180,9 @@ class DatabaseAbstractionLayer():
         if '_id' in additional_data:
             del additional_data['_id']
         # Placing our required arguments into our dictionary
-        additional_data['s_id'] = station_id
-        additional_data['x_cord'] = x_cord
-        additional_data['y_cord'] = y_cord
+        additional_data['s_id'] =   str(station_id)
+        additional_data['x_cord'] = str(x_cord)
+        additional_data['y_cord'] = str(y_cord)
 
         # Placing our dictionary into the database
         self._station.insert_one(additional_data)
@@ -197,7 +199,7 @@ class DatabaseAbstractionLayer():
             Returns:
                 How many documents were deleted.
         '''
-        result = self._station.delete_many({'s_id': int(station_id)})
+        result = self._station.delete_many({'s_id': str(station_id)})
         # Returning the number of documents deleted
         return result.deleted_count
 
@@ -212,10 +214,11 @@ class DatabaseAbstractionLayer():
         Returns:
             An array of all remote documents if no remote ID was specified, otherwise a single remote document.
         '''
+        print(f'Getting a remote {remote_id}')
         if remote_id is None:
             return [self._parse_to_JSON(_) for _ in self._remote.find()]
         else:
-            return self._parse_to_JSON(self._remote.find_one({'r_id': int(remote_id)}))
+            return self._parse_to_JSON(self._remote.find_one({'r_id': str(remote_id)}))
 
     def get_stations(self, station_id=None):
         ''' Returns a list of all station documents as python dictionaries.
@@ -229,7 +232,7 @@ class DatabaseAbstractionLayer():
         if station_id is None:
             return [self._parse_to_JSON(_) for _ in self._station.find()]
         else:
-            return self._parse_to_JSON(self._station.find_one({'s_id': int(station_id)}))
+            return self._parse_to_JSON(self._station.find_one({'s_id': str(station_id)}))
 
     def get_all(self):
         ''' Returns all remote and station documents from the database.
