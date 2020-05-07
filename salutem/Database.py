@@ -158,30 +158,39 @@ class DatabaseAbstractionLayer():
         return self.get_remotes() + get_stations()
 
 if __name__ == '__main__':
-    # Creating example data
-    remote_data = {'r_id':1,'u_id':'166'}
-    station_data = {'s_id':1,'location':'Room A'}
-    station_data_example = {'s_id': 1, 'location':'Room A', 'x_cord':200, 'y_cord': 100.01}
-    remote_name = {'r_id':1}
-    update_data1  = {'station':{'s_id':1,'location':'room A', 'signal':-45}}
-    update_data2  = {'station':{'s_id':2,'location':'room B', 'signal':-20}}
-    update_data3  = {'station':{'s_id':3,'location':'room C', 'signal':-80}}
-
-
+     # Creating instance of database
     foo = DatabaseAbstractionLayer()
-    #creates testing data
-    data  =foo.create_station(station_data)
-    #foo.remove_station(station_data)
-    data = foo.create_remote(remote_data)
-    foo.ping(remote_name)
 
-    foo.update_remote(remote_data,update_data1)
-    foo.update_remote(remote_data,update_data2)
-    foo.update_remote(remote_data,update_data3)
-    foo.ping(remote_name)
-    #:foo.remove_remote(remote_name)
-    data = foo.ping(remote_name)
-    foo.print_all()
-    foo.remove_remote(remote_name)
-    foo.remove_station(station_data)
-    #foo.find_remote(remote_name)
+    # Declaring example remote data
+    remote_test_data_1 = {'r_id': 1, 'u_id': 11}
+    remote_test_data_2 = {'r_id': 2, 'u_id': 12}
+    remote_test_data_3 = {'r_id': 3, 'u_id': 13}
+
+    # Adding some remotes
+    foo.create_remote(remote_data_test_1)
+    foo.create_remote(remote_data_test_2)
+
+    # @TODO Check if remotes 1 & 2 are in the database
+
+    # Removing remote 2 and adding 3, leaving 1 & 3 in the database
+    foo.remove_remote({'r_id': 2})
+    foo.create_remote(remote_data_test_3)
+
+    # @TODO Check if remote 1 and 3 are in the database
+
+    # Declaring example station data
+    station_test_data_1 = {'s_id': 1, 'location':'Room A', 'x_cord':200.3, 'y_cord': 100.01}
+    station_test_data_2 = {'s_id': 2, 'location':'Room B', 'x_cord':370.83, 'y_cord': 73.92}
+    station_test_data_3 = {'s_id': 3, 'location':'Room B', 'x_cord':4.73, 'y_cord': 109.34}
+
+    # Adding some stations
+    foo.create_station(station_test_data_1)
+    foo.create_station(station_test_data_2)
+
+    # @TODO Check if stations 1 & 2 are in the database
+
+    # Removing station 2 and adding 3, leaving 1 & 3 in the database
+    foo.remove_station({'s_id': 2})
+    foo.create_remote(remote_data_test_3)
+
+    # @TODO Check if station 1 & 3 are in the database
