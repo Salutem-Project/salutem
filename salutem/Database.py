@@ -77,7 +77,7 @@ class DatabaseAbstractionLayer():
         If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
         '''
         if ('r_id' in remote_data):
-            result=self.remote.update_one(remote_data,{'$push':update_data})
+            result = self.remote.update_one(remote_data, {'$push': update_data})
             pprint(result)
         else:
             print("invalid syntax")
@@ -89,10 +89,8 @@ class DatabaseAbstractionLayer():
         returns the most current remote location based on the last update from update_remote
         in the format of remote_data = {'r_id':1}
         '''
-        if 'r_id' in remote_data:
-            result=self.remote.find_one(remote_data)
-            #pprint(result)
-            return result
+        if ('r_id' in remote_data):
+            return self.remote.find_one(remote_data)
         else:
             print("invalid syntax")
 
@@ -105,7 +103,7 @@ class DatabaseAbstractionLayer():
         data = self.ping(remote_data)
         location = data.get(u'station')
         index = trilaterate(location)
-        print("remote location is in",end = " ")
+        print("remote location is in", end=" ")
         pprint(location[index].get(u'location'))
 
    # Station
@@ -119,7 +117,7 @@ class DatabaseAbstractionLayer():
             'location':room number or letter
         '''
         if all([key in station_data for key in ['s_id', 'location', 'x_cord', 'y_cord']]):
-            result=self.station.insert_one(station_data)
+            result = self.station.insert_one(station_data)
             pprint(result)
         else:
             print("invalid syntax")
@@ -135,7 +133,7 @@ class DatabaseAbstractionLayer():
            'location':where the station is
         '''
         if ('s_id' in station_data):
-            result=self.station.delete_one(station_data)
+            result = self.station.delete_one(station_data)
             pprint(result)
         else:
             print("invalid syntax")
