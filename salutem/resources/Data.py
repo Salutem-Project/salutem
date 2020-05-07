@@ -26,26 +26,17 @@ class Data(_SalutemAPI):
                 Otherwise, returns a 500 code.
                 HTTP status codes - https://www.restapitutorial.com/httpstatuscodes.html
         '''
-        print(f'Retriving data for group {group}')
-        print(group.lower())
         try:
-            print('Attempting to setup endpoint')
             self._setupEndpoint()
-            print('Endpoint setup')
             if (group.lower() in ['remote', 'remotes']):
-                print('Matched remotes')
                 foo = {
                     group: self._database.get_remotes()
                 }
-                from pprint import pprint
-                pprint(foo)
                 return (foo, 200)
               #return ({group: self._database.get_remotes()}, 200)
             if (group.lower() in ['station', 'stations']):
-                print('Matched sations')
                 return ({group: self._database.get_stations()}, 200)
             if (group.lower() in ['*', 'all', '_', '']):
-                print('Matched all')
                 return ({group: self._database.get_all()}, 200)
         except:
             # Unable to register the device for some reason - internal server error

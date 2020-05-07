@@ -4,158 +4,235 @@
 # https://api.mongodb.com/python/current/tutorial.html
 # https://kb.objectrocket.com/mongo-db/how-to-access-and-parse-mongodb-documents-in-python-364
 # used as guide and reference for this
-#https://stackoverflow.com/questions/37941610/get-all-documents-of-a-collection-using-pymongo
+# https://stackoverflow.com/questions/37941610/get-all-documents-of-a-collection-using-pymongo
 
 '''
 Store the sub-records in the main document, and also write them to the separate collection
 was originally going to do just multiple collections but decided this approach due to
 https://forums.meteor.com/t/on-multiple-collections-vs-embedded-documents/42882/3
 '''
-from pymongo import MongoClient
-from pprint import pprint
-from salutem.tri import trilaterate
+# Standard modules
 import json
+
+# Pypi modules
+from pymongo import MongoClient
 
 class DatabaseAbstractionLayer():
 
     def __init__(self):
+        ''' A logical abstraction layer for a mongoDB database.
+        '''
         # Connect to MongoDB
         client = MongoClient()
         self.database = client.data
 
         # Collection references
-        self.remote =  self.database.remote
-        self.station = self.database.station
-        self.backend = self.database.backend
+        self._remote =  self.database.remote
+        self._station = self.database.station
+        self._backend = self.database.backend
 
+        # The number of pings to keep for any given remote
+        self.max_pings = 10
+
+   # Helper functions
+   #####################################
     def _parse_to_JSON(self, package):
         package['_id'] = str(package['_id'])
         return package
 
    # Remote
    #####################################
-    def create_remote(self, remote_data):
+    def create_remote(self, remote_id, user_id, additional_data={}):
+        ''' Inserts a record into the remote collection.
+
+            Arguments:
+                remote_id (str): The remote's unique identifier
+                user_id (str): The user's id code or unique identifier
+                additional_data (dict): Additional data in the form of a dictionary to add to the record (default = {})
+
+            Returns:
+                The record of the remote that was added
         '''
-        adds new remote data to the remote collection
-        in the format of remote_data = {'r_id':1,'employee':'Jeff'
-        Keys:
-            r_id: The remotes unique identifier
-            u_id: The user's id code or unique identifier
+        # Removing _id if needed
+        if '_id' in additional_data:
+            del additional_data['_id']
+        # Placing our required arguments into our dictionary
+        additional_data['r_id'] = remote_id
+        additional_data['u_id'] = user_id
+        # Placing our dictionary into the database
+        self._remote.insert_one(additional_data)
+        # Returning the record of the added remote
+        return self._parse_to_JSON(self.get_remotes(remote_id))
+
+    def remove_remote(self, remote_id):
+        ''' Removes remotes that have the given remote ID.
+            NOTICE: This does not prompt for deletion. Make sure you want to delete these records before you do so.
+
+            Arguments:
+                remote_id (str): The ID of the remote to delete documents from the database
+
+            Returns:
+                How many documents were deleted.
         '''
-        if ('r_id' in remote_data) and ('u_id' in remote_data):
-            self.remote.insert_one(remote_data)
+        result = self._remote.delete_many({'r_id': int(remote_id)})
+        # Returning the number of documents deleted
+        print(result.deleted_count)
+        return result.deleted_count
+
+    def ping_remote(self, remote_id, station_id, signal):
+        ''' Adds signal information to the specified remote.
+
+            Arguments:
+                remote_id (str): The remote's ID that the signal collected
+                station_id (str): The station's ID that is sending the signal
+                signal (str): The signal strength from the remote
+        '''
+        # First, we check to see if our ping limit has been reached
+        doc = self.get_remotes(remote_id)
+        if size(doc['pings']) < self.max_pings:
+            result = self._remote.update_many(
+                {'r_id': remote_id},   # Filtering to only find remotes with this ID
+                {'$push': {'pings':    # Pushing data onto a key called 'pings'
+                    {'s_id': station_id, 'signal': signal}
+                }}
+            )
+
+        # Our ping limit has been reached, we gotta fix that
         else:
-            print("invalid syntax")
-        data = self.ping(remote_data)
-        return self._parse_to_JSON(data)
+            # Inserting our new ping into the first position of the pings list
+            doc['pings'].insert(0, {
+                's_id': station_id,
+                'signal': signal
+            })
+            # Setting our new list (only the first self.max_pings entries) into the database
+            result = self._remote.update_many(
+                {'r_id': remote_id},   # Filtering to only find remotes with this ID
+                {'$set': {'pings':
+                    doc['pings'][:self.max_pings]
+                }}
+            )
 
-    def remove_remote(self, remote_data):
-        '''
-        for end of day cleaning of remote for next day
-        in the format of remote_data = {'r_id':1}
-        Keys:
-            r_id: id for the remote
-        '''
-        if ('r_id' in remote_data):
-            result=self.remote.delete_many(remote_data)
-            pprint(result)
-        else:
-            print("invalid syntax")
+        # Returning the updated documents
+        self._trilaterate_remote(remote_id)
+        return self.get_remotes(remote_id)
 
-    def update_remote(self, remote_data, update_data):
-        '''
-        updates the remote collection with the new remote data
-        will be used to add location data in the UI
-        the update data parameter is just for the new information
-        uses push to keep a history of locations
-        update_data1  = {'$push':{'station':{'s_id':1,'location':'room A', 'signal':1.2}}}
-        Should expect a dictionary with the following keys:
-            'r_id': The remote's unique identifier that the station picked up
-            's_id': The stations unique identifier of the reporting station
-            'signal': The strength of the signal received from the station
+    def _trilaterate_remote(self, remote_id):
+        ''' Finds the suggested location of the remote using some fancy trilateration.
 
-        This should have a single input dictionary with the minimal information required to put into the database.
-        If the database function requires more information in the dictionary that is the same every time, that should be done inside this function.
+        Arguments:
+            remote_id (str): The remote ID for which to find the location
         '''
-        if ('r_id' in remote_data):
-            result = self.remote.update_one(remote_data, {'$push': update_data})
-            pprint(result)
-        else:
-            print("invalid syntax")
-        data = self.ping(remote_name)
-        return self._parse_to_JSON(data)
+        # First thing, we're going to find our ping location
+        doc = self.find_remote(remote_id)
 
-    def ping(self, remote_data):
-        '''
-        returns the most current remote location based on the last update from update_remote
-        in the format of remote_data = {'r_id':1}
-        '''
-        if ('r_id' in remote_data):
-            return self.remote.find_one(remote_data)
-        else:
-            print("invalid syntax")
+        # Creating a record of stations to add our pings
+        station_data = {}
 
-    def find_remote(self,remote_data):
-        '''
-        data is a dict of the remote data
-        location is a list of signals in the remote data returned by dict.get
-        trilaterare returns the index of the closest station in that original list of signal
-        '''
-        data = self.ping(remote_data)
-        location = data.get(u'station')
-        index = trilaterate(location)
-        print("remote location is in", end=" ")
-        pprint(location[index].get(u'location'))
+        # Doing this with each ping
+        for station, signal in doc['pings']:
+            station_data[station]['pings'].append(signal)
+
+        # Averaging each signal
+        for station, data in station_data:
+            data['signal'] = mean(data['pings'])
+            # Finding the stations location for each station
+            station_doc = self.get_stations(station)
+            data['x_cord'] = station_doc['x_cord']
+            data['y_cord'] = station_doc['y_cord']
+
+        # Finding our average signal to move our center point
+        average_signal =   mean([data['signal'] for _, data in station_data])
+        average_location = (
+            mean([data['x_cord'] for _, data in station_data]),
+            mean([data['y_cord'] for _, data in station_data]),
+        )
+
+        # Moving our average location depending on the signal
+        location = average_location
+        for station_id, data in station_data:
+            # Finding our difference and scale
+            x = (data['x_cord'] - average_location[0]) * (data['signal'] / average_signal)
+            y = (data['y_cord'] - average_location[1]) * (data['signal'] / average_signal)
+            # Adding these values to our suggested location
+            location[0] += x
+            location[1] += y
+
+        # Updating the location of our remote with our new suggested location
+        self._remote.update_many(
+            {'r_id': remote_id},
+            {'$set': {'location': location}}
+        )
 
    # Station
    #####################################
-    def create_station(self, station_data):
-        '''
-        Places a dictionary of information into the database, expecting specific keys.
-        in the format of station_data = {'s_id':1,'location':'Room A'}
-        Expected keys:
-            's_id': The reference id to the station
-            'location':room number or letter
-        '''
-        if all([key in station_data for key in ['s_id', 'location', 'x_cord', 'y_cord']]):
-            result = self.station.insert_one(station_data)
-            pprint(result)
-        else:
-            print("invalid syntax")
-        data = self.station.find_one(station_data)
-        return data
+    def create_station(self, station_id, x_cord, y_cord, additional_data={}):
+        ''' Creates a document with the stations data.
 
-    def remove_station(self, station_data):
+            Arguments:
+                station_id (str): The ID of the station to be added to the database
+                x_cord (float): The location on the x-axis of the given station
+                y_cord (float): The location on the y-axis of the given station
+                additional_data (dict): Additional data in the form of a dictionary to add to the record (default = {})
         '''
-        Deletes the station from the database using s_id and location
-        in the format of station_data = {'s_id':1,'location':'Room A'}
-        Keys:
-           's_id':id for the station
-           'location':where the station is
+        # Removing _id if needed
+        if '_id' in additional_data:
+            del additional_data['_id']
+        # Placing our required arguments into our dictionary
+        additional_data['s_id'] = station_id
+        additional_data['x_cord'] = x_cord
+        additional_data['y_cord'] = y_cord
+
+        # Placing our dictionary into the database
+        self._station.insert_one(additional_data)
+        # Returning the record of the added station
+        return self._parse_to_JSON(self.get_stations(station_id))
+
+    def remove_station(self, station_id):
+        ''' Removes station that have the given station ID.
+            NOTICE: This does not prompt for deletion. Make sure you want to delete these records before you do so.
+
+            Arguments:
+                station_id (str): The ID of the station to delete documents from the database
+
+            Returns:
+                How many documents were deleted.
         '''
-        if ('s_id' in station_data):
-            result = self.station.delete_one(station_data)
-            pprint(result)
-        else:
-            print("invalid syntax")
+        result = self._station.delete_many({'s_id': int(station_id)})
+        # Returning the number of documents deleted
+        return result.deleted_count
 
    # Print functions
    #####################################
-    def get_remotes(self):
-        '''
-        Returns a list of all remote collections as python dictionaries.
-        '''
-        return [self._parse_to_JSON(_) for _ in self.remote.find()]
+    def get_remotes(self, remote_id=None):
+        ''' Returns a list of all remote documents as python dictionaries.
 
-    def get_stations(self):
+        Arguments:
+            remote_id (str): The ID of remote's record to get
+
+        Returns:
+            An array of all remote documents if no remote ID was specified, otherwise a single remote document.
         '''
-        Returns a list of all station collections as python dictionaries.
+        if remote_id is None:
+            return [self._parse_to_JSON(_) for _ in self._remote.find()]
+        else:
+            return self._parse_to_JSON(self._remote.find_one({'r_id': int(remote_id)}))
+
+    def get_stations(self, station_id=None):
+        ''' Returns a list of all station documents as python dictionaries.
+
+        Arguments:
+            remote_id (str): The ID of stations's record to get
+
+        Returns:
+            An array of all station documents if no station ID was specified, otherwise a single station document.
         '''
-        return [self._parse_to_JSON(_) for _ in self.station.find()]
+        if station_id is None:
+            return [self._parse_to_JSON(_) for _ in self._station.find()]
+        else:
+            return self._parse_to_JSON(self._station.find_one({'s_id': int(station_id)}))
 
     def get_all(self):
-        '''
-        print all objects in both remote and station to screen
+        ''' Returns all remote and station documents from the database.
         '''
         return self.get_remotes() + self.get_stations()
 
@@ -163,36 +240,64 @@ if __name__ == '__main__':
      # Creating instance of database
     foo = DatabaseAbstractionLayer()
 
+    # Flushing the database
+    for remote in foo.get_remotes():
+        foo.remove_remote(remote['r_id'])
+    for station in foo.get_stations():
+        foo.remove_station(station['s_id'])
+
+    # Printing a hopefully empty database
+    from pprint import pprint
+    pprint(foo.get_all())
+
     # Declaring example remote data
     remote_test_data_1 = {'r_id': '1', 'u_id': '11'}
-    remote_test_data_2 = {'r_id': '2', 'u_id': '12'}
+    remote_test_data_2 = {'r_id': 2, 'u_id': '12'}
     remote_test_data_3 = {'r_id': 3, 'u_id': 13}
 
     # Adding some remotes
-    foo.create_remote(remote_test_data_1)
-    foo.create_remote(remote_test_data_2)
+    foo.create_remote(*remote_test_data_1.values())
+    foo.create_remote(*remote_test_data_2.values())
 
-    # @TODO Check if remotes 1 & 2 are in the database
+    bar = foo.get_remotes()
+    for remote in bar:
+        del remote['_id']
+    baz = [remote_test_data_1, remote_test_data_2]
+    assert(bar == baz)
 
     # Removing remote 2 and adding 3, leaving 1 & 3 in the database
-    foo.remove_remote({'r_id': 2})
-    foo.create_remote(remote_test_data_3)
+    foo.remove_remote(2)
+    foo.create_remote(*remote_test_data_3.values())
 
-    # @TODO Check if remote 1 and 3 are in the database
+    bar = foo.get_remotes()
+    for remote in bar:
+        del remote['_id']
+    baz = [remote_test_data_1, remote_test_data_3]
+    assert(bar == baz)
 
     # Declaring example station data
-    station_test_data_1 = {'s_id': 1, 'location':'Room A', 'x_cord':200.3, 'y_cord': 100.01}
-    station_test_data_2 = {'s_id': 2, 'location':'Room B', 'x_cord':370.83, 'y_cord': 73.92}
-    station_test_data_3 = {'s_id': 3, 'location':'Room B', 'x_cord':4.73, 'y_cord': 109.34}
+    station_test_data_1 = {'s_id': 1, 'x_cord':200.3, 'y_cord': 100.01}
+    station_test_data_2 = {'s_id': 2, 'x_cord':370.83, 'y_cord': 73.92}
+    station_test_data_3 = {'s_id': 3, 'x_cord':4.73, 'y_cord': 109.34}
 
     # Adding some stations
-    foo.create_station(station_test_data_1)
-    foo.create_station(station_test_data_2)
+    foo.create_station(*station_test_data_1.values())
+    foo.create_station(*station_test_data_2.values())
 
-    # @TODO Check if stations 1 & 2 are in the database
+    bar = foo.get_stations()
+    for station in bar:
+        del station['_id']
+    baz = [station_test_data_1, station_test_data_2]
+    assert(bar == baz)
 
     # Removing station 2 and adding 3, leaving 1 & 3 in the database
-    foo.remove_station({'s_id': 2})
-    foo.create_remote(remote_data_test_3)
+    foo.remove_station(2)
+    foo.create_station(*station_test_data_3.values())
 
-    # @TODO Check if station 1 & 3 are in the database
+    bar = foo.get_stations()
+    for station in bar:
+        del station['_id']
+    baz = [station_test_data_1, station_test_data_3]
+    assert(bar == baz)
+
+    print('Passed Unit Test!!!!!!!!!! :)')
