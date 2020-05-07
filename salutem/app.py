@@ -7,7 +7,7 @@ from flask_restful import Api
 # Local modules
 from salutem.resources.Remote import Remote as RemoteEndpoint
 from salutem.resources.Station import Station as StationEndpoint
-
+from salutem.resources.Data import Data as DataEndpoint
 # Creating our application and API
 FLASK_APP = Flask(__name__)
 FLASK_API = Api(FLASK_APP)
