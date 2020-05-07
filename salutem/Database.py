@@ -115,7 +115,7 @@ class DatabaseAbstractionLayer():
             's_id': The reference id to the station
             'location':room number or letter
         '''
-        if all([key in station_data for key in ['s_id', 'location', 'x_cord', 'y_cord']]:
+        if all([key in station_data for key in ['s_id', 'location', 'x_cord', 'y_cord']]):
             result=self.station.insert_one(station_data)
             pprint(result)
         else:
