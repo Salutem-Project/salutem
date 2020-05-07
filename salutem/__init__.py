@@ -1,2 +1,2 @@
 # Defining all modules
-__all__ = ['Database', 'Remotes']
+__all__ = ['app', 'Database', 'settings', 'tri']

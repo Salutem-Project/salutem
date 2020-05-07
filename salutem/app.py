@@ -16,7 +16,9 @@ FLASK_API = Api(FLASK_APP)
 # API endpoints
 FLASK_API.add_resource(DataEndpoint,  "/<string:group>")
 FLASK_API.add_resource(RemoteEndpoint, "/remote/<string:remoteID>")
+FLASK_API.add_resource(RemoteEndpoint, "/remotes/<string:remoteID>")
 FLASK_API.add_resource(StationEndpoint, "/station/<string:stationID>")
+FLASK_API.add_resource(StationEndpoint, "/stations/<string:stationID>")
 
 # Starting the application up if this is the main file
 if __name__ == "__main__":
