@@ -2,7 +2,7 @@
 from salutem.resources.Endpoint import _SalutemAPI
 from salutem.settings import getAPISettings
 
-from datetime import datetime
+import ast
 
 # This module does its best to use a modified google docstring standard - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
@@ -22,9 +22,8 @@ class Station(_SalutemAPI):
         try:
             # Collecting arguments from the payload
             args = self._setupEndpoint(['x_cord', 'y_cord', 'additional_data'])
-            from pprint import pprint
-            print(f'Adding station {stationID}')
-            pprint(args)
+            # Making additional data a dictionary
+            args['additional_data'] = ast.literal_eval(args['additional_data'].replace('\'', '\"'))
             # Registering this information with the database
             remoteInfo = self._database.create_station(stationID, *args.values())
             # Returning success
