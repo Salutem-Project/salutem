@@ -61,7 +61,6 @@ class DatabaseAbstractionLayer():
         additional_data['u_id'] = str(user_id)
         # Placing our dictionary into the database
         self._remote.insert_one(additional_data)
-        print('Inserting one')
         # Returning the record of the added remote
         from pprint import pprint
         # pprint('Remote = ' + {self.get_remotes(remote_id)})
