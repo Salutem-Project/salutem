@@ -30,7 +30,7 @@ class Remote(_SalutemAPI):
             # Collecting arguments from the payload
             args = self._setupEndpoint(['u_id', 'additional_data'])
             # Making additional data a dictionary
-            args['additional_data'] = ast.literal_eval(args['additional_data'].replace('\'', '\"')) if args['additional_data'] != '{}' else {}
+            args['additional_data'] = ast.literal_eval(args['additional_data'].replace('\'', '\"')) if args['additional_data'] not in ['{}', None] else {}
             # Registering this information with the database
             remoteInfo = self._database.create_remote(remoteID, *args.values())
             # Returning success

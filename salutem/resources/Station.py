@@ -23,7 +23,7 @@ class Station(_SalutemAPI):
             # Collecting arguments from the payload
             args = self._setupEndpoint(['x_cord', 'y_cord', 'additional_data'])
             # Making additional data a dictionary
-            args['additional_data'] = ast.literal_eval(args['additional_data'].replace('\'', '\"'))
+            args['additional_data'] = ast.literal_eval(args['additional_data'].replace('\'', '\"')) if args['additional_data'] not in ['{}', None] else {}
             # Registering this information with the database
             remoteInfo = self._database.create_station(stationID, *args.values())
             # Returning success
