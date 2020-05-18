@@ -13,6 +13,7 @@ https://forums.meteor.com/t/on-multiple-collections-vs-embedded-documents/42882/
 '''
 # Standard modules
 import json
+from statistics import mean
 
 # Pypi modules
 from pymongo import MongoClient
@@ -37,6 +38,9 @@ class DatabaseAbstractionLayer():
    # Helper functions
    #####################################
     def _parse_to_JSON(self, package):
+        from pprint import pprint
+        print('Package inspection')
+        pprint(package)
         package['_id'] = str(package['_id'])
         return package
 
@@ -80,21 +84,23 @@ class DatabaseAbstractionLayer():
         # Returning the number of documents deleted
         return result.deleted_count
 
-    def ping_remote(self, remote_id, station_id, signal):
+    def ping_remote(self, r_id, s_id, signal):
         ''' Adds signal information to the specified remote.
 
             Arguments:
-                remote_id (str): The remote's ID that the signal collected
-                station_id (str): The station's ID that is sending the signal
+                r_id (str): The remote's ID that the signal collected
+                s_id (str): The station's ID that is sending the signal
                 signal (str): The signal strength from the remote
         '''
         # First, we check to see if our ping limit has been reached
-        doc = self.get_remotes(remote_id)
-        if size(doc['pings']) < self.max_pings:
+        doc = self.get_remotes(r_id)
+        if 'pings' not in doc.keys():
+            doc['pings'] = []
+        if len(doc['pings']) < self.max_pings:
             result = self._remote.update_many(
-                {'r_id': remote_id},   # Filtering to only find remotes with this ID
+                {'r_id': r_id},   # Filtering to only find remotes with this ID
                 {'$push': {'pings':    # Pushing data onto a key called 'pings'
-                    {'s_id': station_id, 'signal': signal}
+                    {'s_id': s_id, 'signal': signal}
                 }}
             )
 
@@ -102,20 +108,20 @@ class DatabaseAbstractionLayer():
         else:
             # Inserting our new ping into the first position of the pings list
             doc['pings'].insert(0, {
-                's_id': station_id,
+                's_id': s_id,
                 'signal': signal
             })
             # Setting our new list (only the first self.max_pings entries) into the database
             result = self._remote.update_many(
-                {'r_id': remote_id},   # Filtering to only find remotes with this ID
+                {'r_id': r_id},   # Filtering to only find remotes with this ID
                 {'$set': {'pings':
                     doc['pings'][:self.max_pings]
                 }}
             )
 
         # Returning the updated documents
-        self._trilaterate_remote(remote_id)
-        return self.get_remotes(remote_id)
+        self._trilaterate_remote(r_id)
+        return self.get_remotes(r_id)
 
     def _trilaterate_remote(self, remote_id):
         ''' Finds the suggested location of the remote using some fancy trilateration.
@@ -124,36 +130,38 @@ class DatabaseAbstractionLayer():
             remote_id (str): The remote ID for which to find the location
         '''
         # First thing, we're going to find our ping location
-        doc = self.find_remote(remote_id)
+        doc = self.get_remotes(remote_id)
 
         # Creating a record of stations to add our pings
         station_data = {}
 
         # Doing this with each ping
-        for station, signal in doc['pings']:
-            station_data[station]['pings'].append(signal)
+        for data in doc['pings']:
+            if data['s_id'] not in station_data.keys():
+                station_data[data['s_id']] = {'pings': []}
+            station_data[data['s_id']]['pings'].append(int(data['signal']))
 
         # Averaging each signal
-        for station, data in station_data:
-            data['signal'] = mean(data['pings'])
+        for station, data in station_data.items():
+            station_data[station]['signal'] = mean(data['pings'])
             # Finding the stations location for each station
             station_doc = self.get_stations(station)
             data['x_cord'] = station_doc['x_cord']
             data['y_cord'] = station_doc['y_cord']
 
         # Finding our average signal to move our center point
-        average_signal =   mean([data['signal'] for _, data in station_data])
-        average_location = (
-            mean([data['x_cord'] for _, data in station_data]),
-            mean([data['y_cord'] for _, data in station_data]),
-        )
+        average_signal = mean([data['signal'] for _, data in station_data.items()])
+        average_location = [
+            mean([int(data['x_cord']) for _, data in station_data.items()]),
+            mean([int(data['y_cord']) for _, data in station_data.items()]),
+        ]
 
         # Moving our average location depending on the signal
         location = average_location
-        for station_id, data in station_data:
+        for station_id, data in station_data.items():
             # Finding our difference and scale
-            x = (data['x_cord'] - average_location[0]) * (data['signal'] / average_signal)
-            y = (data['y_cord'] - average_location[1]) * (data['signal'] / average_signal)
+            x = (int(data['x_cord']) - average_location[0]) * (int(data['signal']) / average_signal)
+            y = (int(data['y_cord']) - average_location[1]) * (int(data['signal']) / average_signal)
             # Adding these values to our suggested location
             location[0] += x
             location[1] += y
