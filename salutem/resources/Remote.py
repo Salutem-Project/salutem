@@ -75,10 +75,17 @@ class Remote(_SalutemAPI):
                 signal (str): The signal strength of the remote device from the base station that is sending the information.
         '''
         try:
+            # print('Testing', flush=True)
+            # print(request.data, flush=True)
+            # print('end', flush=True)
             # Setting up our endpoint by getting some arguments
             args = self._setupEndpoint(['s_id', 'signal', 'status'])
             # Recording record with our database
+            # from pprint import pprint
+            # print(f'Pinging target {remoteID} with:')
+            # pprint(args)
             self._database.ping_remote(remoteID, *args.values())
+            # print('remote has been pinged', flush=True)
             # Sending email if status is 1
             # 78; //78 == N
             # 65; //65 == A
@@ -98,9 +105,13 @@ class Remote(_SalutemAPI):
                     print('Connection to the SMTP server could not be established. Please reconfigure')
 
             # Returning success
+            # print('success', flush=True)
+            from pprint import pprint
+            pprint(f'{remoteID} from {args["s_id"]} ' + str(self._database.get_remotes()[0]['location']))
             return('Data successfully delivered.', 200)
         except:
             # Unable to store information about remote - internal server error
+            # print('failure', flush=True)
             return('Unable to record information.', 500)
 
     def get(self, remoteID):

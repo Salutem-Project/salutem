@@ -218,7 +218,6 @@ class DatabaseAbstractionLayer():
         Returns:
             An array of all remote documents if no remote ID was specified, otherwise a single remote document.
         '''
-        print(f'Getting a remote {remote_id}')
         if remote_id is None:
             return [self._parse_to_JSON(_) for _ in self._remote.find()]
         else:
@@ -236,7 +235,8 @@ class DatabaseAbstractionLayer():
         if station_id is None:
             return [self._parse_to_JSON(_) for _ in self._station.find()]
         else:
-            return self._parse_to_JSON(self._station.find_one({'s_id': str(station_id)}))
+            jsonData = self._parse_to_JSON(self._station.find_one({'s_id': str(station_id)}))
+            return jsonData
 
     def get_all(self):
         ''' Returns all remote and station documents from the database.
