@@ -38,9 +38,6 @@ class DatabaseAbstractionLayer():
    # Helper functions
    #####################################
     def _parse_to_JSON(self, package):
-        from pprint import pprint
-        print('Package inspection')
-        pprint(package)
         package['_id'] = str(package['_id'])
         return package
 
@@ -84,7 +81,7 @@ class DatabaseAbstractionLayer():
         # Returning the number of documents deleted
         return result.deleted_count
 
-    def ping_remote(self, r_id, s_id, signal):
+    def ping_remote(self, r_id, s_id, signal, status):
         ''' Adds signal information to the specified remote.
 
             Arguments:
