@@ -4,6 +4,10 @@ from salutem.settings import getAPISettings
 
 from datetime import datetime
 
+# Email modules
+import smtplib
+from email.message import EmailMessage
+
 # This module does its best to use a modified google docstring standard - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 
 class Remote(_SalutemAPI):
@@ -70,9 +74,20 @@ class Remote(_SalutemAPI):
         '''
         try:
             # Setting up our endpoint by getting some arguments
-            args = self._setupEndpoint(['s_id', 'signal'])
+            args = self._setupEndpoint(['s_id', 'signal', 'status'])
             # Recording record with our database
             self._database.ping_remote(remoteID, *args.values())
+            # Sending email if status is 1
+            if int(args['status']) == 1:
+                email = EmailMessage()
+                email.set_content(f'Distress status sent from remote {remoteID}')
+                email['Subject'] = 'Distress signal sent'
+                email['From'] = 'matthewpogue606@gmail.com'
+                email['To'] = 'matthewpogue606@gmail.com'
+                s = smtplib.SMTP('localhost')
+                s.send_message(email)
+                s.quit()
+
             # Returning success
             return('Data successfully delivered.', 200)
         except:
