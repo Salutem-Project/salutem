@@ -4,6 +4,8 @@ from salutem.settings import getAPISettings
 
 from datetime import datetime
 
+from flask import request
+
 # Email modules
 import smtplib
 from email.message import EmailMessage
@@ -78,15 +80,22 @@ class Remote(_SalutemAPI):
             # Recording record with our database
             self._database.ping_remote(remoteID, *args.values())
             # Sending email if status is 1
-            if int(args['status']) == 1:
-                email = EmailMessage()
-                email.set_content(f'Distress status sent from remote {remoteID}')
-                email['Subject'] = 'Distress signal sent'
-                email['From'] = 'matthewpogue606@gmail.com'
-                email['To'] = 'matthewpogue606@gmail.com'
-                s = smtplib.SMTP('localhost')
-                s.send_message(email)
-                s.quit()
+            # 78; //78 == N
+            # 65; //65 == A
+            # 73; //73 == I
+            if args['status'] in ['A', 65]:
+                print('SENDING ALERT', flush=True)
+                try:
+                    email = EmailMessage()
+                    email.set_content(f'Distress status sent from remote {remoteID}')
+                    email['Subject'] = 'Distress signal sent'
+                    email['From'] = 'matthewpogue606@gmail.com'
+                    email['To'] = 'matthewpogue606@gmail.com'
+                    s = smtplib.SMTP('localhost')
+                    s.send_message(email)
+                    s.quit()
+                except ConnectionRefusedError:
+                    print('Connection to the SMTP server could not be established. Please reconfigure')
 
             # Returning success
             return('Data successfully delivered.', 200)
