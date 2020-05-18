@@ -33,7 +33,7 @@ class DatabaseAbstractionLayer():
         self._backend = self.database.backend
 
         # The number of pings to keep for any given remote
-        self.max_pings = 10
+        self.max_pings = 20
 
    # Helper functions
    #####################################
