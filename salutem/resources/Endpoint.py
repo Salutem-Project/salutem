@@ -24,4 +24,8 @@ class _SalutemAPI(Resource):
         # Creating a reference to the database
         self._database = DatabaseAbstractionLayer()
         # Returning arguments parsed from an argument list
-        return self._parseArguments(argumentList) if (argumentList is not None) else None
+        if argumentList is not None:
+            return self._parseArguments(argumentList)
+        else:
+            return None
+        # return self._parseArguments(argumentList) if (argumentList is not None) else None
