@@ -22,3 +22,20 @@ The system is contained in three logical layers, each handling their own specifi
 ## API Logical Resources
 
 `_GeneralAPI` - Used as a base for all other resources. This creates an interface with the database and provides defaults for error's and general handling.
+
+# Installation
+
+Check to make sure that you have a [https://www.python.org/](https://www.python.org/) newer than 3.7 installed, have you have access to easy_install or [pip](https://www.python.org/).
+
+This is where you would create a virtual environment if wanted.  
+Using pip, install the dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+Launch the server by using:
+
+```
+python -m salutem
+```
